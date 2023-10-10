@@ -1,0 +1,109 @@
+---
+title: "HW 6 (Reproducible Reporting)"
+author: "Laavanya Joshi Malik"
+date: "2023-10-10"
+output:
+  pdf_document: default
+  word_document: default
+---
+
+**Introduction:** For my reproducible reporting project, I'm using the Lead-IQ data set which has been derived as a result of the original study published, Neuro-Psychological dysfunction in children with chronic low-level lead absorption in 1975 by Landrigan PJ, Baloh RW, Barthelt WF, Whitworth RH, Staehlinh NW, and Rosenblum BF.
+
+I began with installing the packages I need and then downloaded the libraries.
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+library("dplyr")
+library("tidyverse")
+library("ggplot2")
+library("knitr")
+library("kableExtra")
+
+```
+
+**Uploading data set and creating data frame:** After utilizing tidyverse library to upload the dataset, I also created my data frame, lead. This organization will help me with my exploratory analysis.
+
+```{r, message=FALSE, warning=FALSE}
+
+file_path <- "/Users/Laavanya/Malik_Project_01/DataRaw/lead-iq-01.csv"
+lead <- read_csv(file_path)
+
+#head(lead)
+#tail(lead)
+
+```
+
+**For part A:** Graph showcases mean IQ levels by location status:
+
+```{r, message=FALSE, warning=FALSE}
+
+ggplot(lead, aes(x = Smelter, y = IQ, fill = Smelter)) +
+  geom_boxplot() +
+  scale_fill_manual(values=c("Far" = "#F78DA7", "Near" = "#E75480")) +
+  labs(title = "Distribution of IQ Scores by Location",
+       x = "Location",
+       y = "IQ Scores") +
+  theme_minimal()
+
+```
+
+**Interpretation (part C):**
+
+*Box Plot*: The boxplot displays the distribution of IQ score for children that live "Far" and "Near" the large, lead-emitting ore smelter. As we can see, the median IQ for "Far" is greater than the IQ for "Near." There are some outliers for the IQ scores for the "Far" showcasing that these individuals' IQ scores may be impacted by other circumstances, which seems right since they live "far" from the lead-emitting ore smelter. Nonetheless, there isnt great variation between the IQ scores, which can mean there are socioeconomic and educational factors that influence our data set.
+
+\newpage
+
+**For part B:** Table with subset of values from Lead-IQ data set!
+
+```{r, message=FALSE, warning=FALSE}
+
+even_iq_data <- lead %>% 
+  filter(IQ %% 2 == 0, IQ > 90)
+
+even_iq_table <- even_iq_data %>%
+  kable("simple") %>%
+  kable_styling("striped", full_width = F)
+
+# Print the table
+even_iq_table
+
+subset_lead <- lead[lead$IQ %% 2 == 0 & lead$IQ > 90, ]
+write.csv(subset_lead, file = "filtered_lead_data.csv", row.names = FALSE)
+
+```
+
+**Interpretation (part C)**
+
+*Table*: Since the data set is 124 observations in total, I decided to create a table with just the IQ scores that are even and greater than 90. It's a simple table style (although, I did install the kableExtra package).
+
+\newpage
+
+**For part D:**
+
+Calculating the means of the IQ scores. Further, I also decided to create a box plot with the average IQ scores per location type, which is binary.
+
+```{r, message=FALSE, warning=FALSE}
+
+mean_iq_near <- mean(lead$IQ[lead$Smelter == "Near"], na.rm = TRUE)
+mean_iq_far <- mean(lead$IQ[lead$Smelter == "Far"], na.rm = TRUE)
+
+lead %>%
+  group_by(Smelter) %>%
+  summarise(MeanIQ = mean(IQ)) %>%
+  ggplot(aes(x = Smelter, y = MeanIQ, fill = Smelter)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values=c("Far" = "#F78DA7", "Near" = "#E75480")) +
+  labs(title = "Average IQ by Location",
+       x = "Location",
+       y = "Average IQ") +
+  theme_minimal()
+
+```
+
+The avg IQ score for near the smelter is `r round(mean_iq_near, 1)` and far from the smelter is `r round(mean_iq_far, 1)`.
+
+**Conclusion**
+
+This was a pretty fascinating data set to work with. It was very interesting to measure and explore the influence of harmful materials such as lead have on the human body.
+
