@@ -50,7 +50,7 @@ ggplot(lead, aes(x = Smelter, y = IQ, fill = Smelter)) +
 
 **Interpretation (part C):**
 
-*Box Plot*: The boxplot displays the distribution of IQ score for children that live "Far" and "Near" the large, lead-emitting ore smelter. As we can see, the median IQ for "Far" is greater than the IQ for "Near." There are some outliers for the IQ scores for the "Far" showcasing that these individuals' IQ scores may be impacted by other circumstances, which seems right since they live "far" from the lead-emitting ore smelter. Nonetheless, there isnt great variation between the IQ scores, which can mean there are socioeconomic and educational factors that influence our data set.
+*Box Plot*: The boxplot displays the distribution of IQ score for children that live "Far" and "Near" the large, lead-emitting ore smelter. There are some outliers for the IQ scores for the "Far" which are WAY above the maximum possible IQ score. This indicates a flaw in the data. Nonetheless, the boxplot helps a lot with helping us see the defect/inaccuracy.
 
 \newpage
 
@@ -67,9 +67,6 @@ even_iq_table <- even_iq_data %>%
 
 # Print the table
 even_iq_table
-
-subset_lead <- lead[lead$IQ %% 2 == 0 & lead$IQ > 90, ]
-write.csv(subset_lead, file = "filtered_lead_data.csv", row.names = FALSE)
 
 ```
 
@@ -102,6 +99,81 @@ lead %>%
 ```
 
 The avg IQ score for near the smelter is `r round(mean_iq_near, 1)` and far from the smelter is `r round(mean_iq_far, 1)`.
+
+\newpage
+
+**For part 3**
+
+I did notice something weird. I definitely caught this as soon as I noticed the box plot in part A where I was simply displaying my data set. The value 999 is extremely odd and did give me the hint that it was supposed to be 99.
+
+```{r, message=FALSE, warning=FALSE}
+
+lead_mod <- lead
+lead_mod$IQ[lead_mod$IQ == 999] <- 99
+
+write.csv(lead_mod, file = "corrected_dataset.csv", row.names = FALSE)
+
+```
+
+**For part A**
+
+```{r, message=FALSE, warning=FALSE}
+
+ggplot(lead_mod, aes(x = Smelter, y = IQ, fill = Smelter)) +
+  geom_boxplot() +
+  scale_fill_manual(values=c("Far" = "#F78DA7", "Near" = "#E75480")) +
+  labs(title = "Distribution of IQ Scores by Location",
+       x = "Location",
+       y = "IQ Scores") +
+  theme_minimal()
+
+```
+
+**Interpretation (part C):**
+
+*Box Plot*: The boxplot displays the distribution of IQ score for children that live "Far" and "Near" the large, lead-emitting ore smelter. As we can see, the median IQ for "Far" is greater than the IQ for "Near." There are some outliers for the IQ scores for the "Far" showcasing that these individuals' IQ scores may be impacted by other circumstances, which seems right since they live "far" from the lead-emitting ore smelter. Nonetheless, there isnt great variation between the IQ scores, which can mean there are socioeconomic and educational factors that influence our data set.
+
+**For part B**
+
+```{r, message=FALSE, warning=FALSE}
+
+even_iq_data <- lead_mod %>% 
+  filter(IQ %% 2 == 0, IQ > 90)
+
+even_iq_table <- even_iq_data %>%
+  kable("simple") %>%
+  kable_styling("striped", full_width = F)
+
+# Print the table
+even_iq_table
+
+```
+
+**Interpretation (part C)**
+
+*Table*: We don't notice a big change to this since my subset of data was even AND greater than 90. 99 is an odd number :)
+
+**For part D**
+
+```{r, message=FALSE, warning=FALSE}
+
+mean_iq_near_mod <- mean(lead_mod$IQ[lead_mod$Smelter == "Near"], na.rm = TRUE)
+mean_iq_far_mod <- mean(lead_mod$IQ[lead_mod$Smelter == "Far"], na.rm = TRUE)
+
+lead_mod %>%
+  group_by(Smelter) %>%
+  summarise(MeanIQ = mean(IQ)) %>%
+  ggplot(aes(x = Smelter, y = MeanIQ, fill = Smelter)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values=c("Far" = "#F78DA7", "Near" = "#E75480")) +
+  labs(title = "Average IQ by Location",
+       x = "Location",
+       y = "Average IQ") +
+  theme_minimal()
+
+```
+
+The avg IQ score for near the smelter is `r round(mean_iq_near_mod, 1)` and far from the smelter is `r round(mean_iq_far_mod, 1)`. The change we notice is the value of mean IQ score for "Far" children from the smelter.
 
 **Conclusion**
 
